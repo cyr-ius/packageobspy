@@ -28,8 +28,8 @@ async def main() -> None:
     async with ClientSession() as session:
         api = PackageObs(token=secrets["TOKEN"], session=session)
         response = await api.async_get_stations()
-        response = await api.async_get_6m(id_station=72181001)
-        response = await api.async_get_horaire(id_departement=72)
+        response = await api.async_get_6m(id_station=98833002)
+        response = await api.async_get_horaire(id_departement=78)
         logger.info(response)
         await api.async_close()
 
