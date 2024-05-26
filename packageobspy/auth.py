@@ -9,7 +9,7 @@ import logging
 import socket
 from typing import Any
 
-from aiohttp import ClientError, ClientSession
+from aiohttp import ClientError, ClientResponseError, ClientSession
 
 from .const import TIMEOUT, TOKEN_ENDPONT
 from .exceptions import HttpRequestError, PackageObsException, TimeoutExceededError
@@ -21,23 +21,18 @@ class Auth:
     """Class for Auth API."""
 
     def __init__(
-        self, token: str, session: ClientSession | None = None, timeout: int = TIMEOUT
+        self, token: str, session: ClientSession, timeout: int = TIMEOUT
     ) -> None:
         """Init."""
         self.token = token
         self.timeout = timeout
-        self.session = session if session else ClientSession()
+        self.session = session
         self.last_access: dt | None = None
         self.access_token: str | None = None
         self.expires_in: dt = dt.now()
 
-    async def async_close(self) -> None:
-        """Close session."""
-        await self.session.close()
-
-    async def request(self, url: str, method: str = "GET", **kwargs: Any) -> Any:
+    async def async_request(self, url: str, method: str = "get", **kwargs: Any) -> Any:
         """Request session."""
-        _LOGGER.debug("Url: %s (%s)", url, method)
         kwargs.setdefault("headers", {})
 
         if url != TOKEN_ENDPONT:
@@ -46,35 +41,35 @@ class Auth:
 
         try:
             async with asyncio.timeout(TIMEOUT):
+                _LOGGER.debug("Url: %s (%s) - Content: %s", url, method, json)
                 response = await self.session.request(method, url, **kwargs)
+                response.raise_for_status()
         except (asyncio.CancelledError, asyncio.TimeoutError) as error:
             raise TimeoutExceededError(
                 "Timeout occurred while connecting to MyRain."
             ) from error
+        except ClientResponseError:
+            contents = await response.read()
+            response.close()
+            if response.headers.get("Content-Type") == "application/json":
+                raise PackageObsException(
+                    response.status, json.loads(contents.decode("utf8"))
+                )
+            raise PackageObsException(response.status, {"message": contents})
         except (ClientError, socket.gaierror) as error:
             raise HttpRequestError(
                 "Error occurred while communicating with MyRain."
             ) from error
 
-        content_type = response.headers.get("Content-Type", "")
-        if response.status // 100 in [4, 5]:
-            contents = await response.read()
-            response.close()
-            if content_type == "application/json":
-                raise PackageObsException(
-                    response.status, json.loads(contents.decode("utf8"))
-                )
-            raise PackageObsException(response.status, {"message": contents})
-
         return (
             await response.json()
-            if "application/json" in content_type
+            if "application/json" in response.headers.get("Content-Type", "")
             else await response.text()
         )
 
     async def async_get_token(self) -> None:
         if dt.now() > self.expires_in:
-            token = await self.request(
+            token = await self.async_request(
                 url=TOKEN_ENDPONT,
                 method="post",
                 json={"grant_type": "client_credentials"},
