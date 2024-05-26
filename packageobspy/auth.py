@@ -41,17 +41,16 @@ class Auth:
 
         try:
             async with asyncio.timeout(TIMEOUT):
-                _LOGGER.debug("Url: %s (%s) - Content: %s", url, method, json)
+                _LOGGER.debug("Request: %s (%s) - %s", url, method, kwargs.get("json"))
                 response = await self.session.request(method, url, **kwargs)
+                contents = await response.read()
                 response.raise_for_status()
         except (asyncio.CancelledError, asyncio.TimeoutError) as error:
             raise TimeoutExceededError(
                 "Timeout occurred while connecting to MyRain."
             ) from error
         except ClientResponseError:
-            contents = await response.read()
-            response.close()
-            if response.headers.get("Content-Type") == "application/json":
+            if "application/json" in response.headers.get("Content-Type", ""):
                 raise PackageObsException(
                     response.status, json.loads(contents.decode("utf8"))
                 )
