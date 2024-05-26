@@ -23,7 +23,7 @@ with open("./secrets.yaml", encoding="UTF-8") as file:
     secrets = yaml.safe_load(file)
 
 
-async def main() -> None:
+async def async_main() -> None:
     """Main function."""
     async with ClientSession() as session:
         api = PackageObs(token=secrets["TOKEN"], session=session)
@@ -35,6 +35,5 @@ async def main() -> None:
 
 
 if __name__ == "__main__":
-    loop = asyncio.new_event_loop()
-    asyncio.set_event_loop(loop)
-    asyncio.run(main())
+    loop = asyncio.get_event_loop()
+    loop.run_until_complete(async_main())
