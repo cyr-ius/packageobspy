@@ -1,17 +1,5 @@
-"""Class exception."""
+"""Exception classes for packageobspy."""
 
 
 class PackageObsException(Exception):
-    """Enedis exception."""
-
-
-class LimitReached(PackageObsException):
-    """Limit reached exception."""
-
-
-class TimeoutExceededError(PackageObsException):
-    """Limit reached exception."""
-
-
-class HttpRequestError(PackageObsException):
-    """Http request error."""
+    """Exception raised by the PackageObs API client."""

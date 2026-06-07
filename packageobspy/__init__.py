@@ -1,17 +1,12 @@
 """packageobspy package."""
 
-from .exceptions import (
-    HttpRequestError,
-    LimitReached,
-    PackageObsException,
-    TimeoutExceededError,
-)
+from .auth import HttpRequestError, TimeoutExceededError
+from .exceptions import PackageObsException
 from .packageobs import PackageObs
 
 __all__ = [
     "PackageObs",
     "PackageObsException",
     "HttpRequestError",
-    "LimitReached",
     "TimeoutExceededError",
 ]
