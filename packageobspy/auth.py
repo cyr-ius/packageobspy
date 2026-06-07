@@ -25,24 +25,17 @@ class HTTPRequest:
         self.token = token
         self.timeout = timeout
         self.session = session or ClientSession()
-        self.last_access: dt | None = None
         self.access_token: str | None = None
         self.expires_in: dt = dt.now()
 
     async def async_request(self, url: str, method: str = "get", **kwargs: Any) -> Any:
         """Send an authenticated HTTP request and return the parsed response."""
-        contents: Any = None
-        response: Any = None
-        kwargs.setdefault("headers", {})
-
         if url != TOKEN_ENDPONT:
             await self.async_get_token()
             kwargs["headers"] = {"Authorization": f"Bearer {self.access_token}"}
 
         try:
-            async with asyncio.timeout(TIMEOUT):
-                if self.session is None:
-                    raise HttpRequestError("ClientSession is not initialized.")
+            async with asyncio.timeout(self.timeout):
                 _LOGGER.debug("Request: %s (%s) - %s", url, method, kwargs.get("json"))
                 response = await self.session.request(method, url, **kwargs)
                 contents = await response.read()
@@ -62,11 +55,9 @@ class HTTPRequest:
                 "Error occurred while communicating with PackageObs API."
             ) from error
 
-        return (
-            await response.json()
-            if "application/json" in response.headers.get("Content-Type", "")
-            else await response.text()
-        )
+        if "application/json" in response.headers.get("Content-Type", ""):
+            return json.loads(contents)
+        return contents.decode()
 
     async def async_get_token(self) -> None:
         """Fetch and cache a new OAuth2 access token if the current one has expired."""
@@ -93,7 +84,3 @@ class HttpRequestError(Exception):
 
 class TimeoutExceededError(HttpRequestError):
     """Exception raised when a request times out."""
-
-
-class RequestException(HttpRequestError):
-    """Exception raised for errors in the request."""
