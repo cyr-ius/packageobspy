@@ -1,14 +1,10 @@
 """PackageObs client for Météo-France observation data."""
 
-from __future__ import annotations
-
 import logging
 from typing import Any
 
-from aiohttp import ClientSession
-
 from .auth import HTTPRequest, HttpRequestError
-from .const import API_URL, TIMEOUT
+from .const import API_URL
 from .exceptions import PackageObsException
 
 _LOGGER = logging.getLogger(__name__)
@@ -16,12 +12,6 @@ _LOGGER = logging.getLogger(__name__)
 
 class PackageObs(HTTPRequest):
     """Client for the Météo-France DPPaquetObs observation API."""
-
-    def __init__(
-        self, token: str, session: ClientSession | None = None, timeout: int = TIMEOUT
-    ) -> None:
-        """Initialize."""
-        super().__init__(token=token, session=session, timeout=timeout)
 
     async def async_get_stations(self) -> Any:
         """List stations."""
