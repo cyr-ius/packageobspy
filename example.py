@@ -28,10 +28,9 @@ async def async_main() -> None:
     async with ClientSession() as session:
         api = PackageObs(token=secrets["TOKEN"], session=session)
         try:
-            response = await api.async_get_stations()
-            response = await api.async_get_6m(id_station=98833002)
-            response = await api.async_get_horaire(id_departement=78)
-            logger.info(response)
+            logger.info(await api.async_get_stations())
+            logger.info(await api.async_get_6m(id_station=98833002))
+            logger.info(await api.async_get_horaire(id_departement=78))
         except PackageObsException as err:
             logger.error(err)
         finally:
