@@ -29,6 +29,11 @@ dependencies    = [
     "aiohttp>=3.9.5",
 ]
 
+[project.optional-dependencies]
+dev = [
+    "yamllint",
+]
+
 [tool.setuptools_scm]
 
 [tool.setuptools]
