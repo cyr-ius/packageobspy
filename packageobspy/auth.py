@@ -1,6 +1,4 @@
-"""Class for Authentication."""
-
-from __future__ import annotations
+"""HTTP request handler for the VigiEau API client."""
 
 import asyncio
 from datetime import datetime as dt, timedelta
@@ -21,12 +19,12 @@ class Auth:
     """Class for Auth API."""
 
     def __init__(
-        self, token: str, session: ClientSession, timeout: int = TIMEOUT
+        self, token: str, session: ClientSession | None = None, timeout: int = TIMEOUT
     ) -> None:
         """Init."""
         self.token = token
         self.timeout = timeout
-        self.session = session
+        self.session = session or ClientSession()
         self.last_access: dt | None = None
         self.access_token: str | None = None
         self.expires_in: dt = dt.now()
