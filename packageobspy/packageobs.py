@@ -17,10 +17,7 @@ class PackageObs:
     """Get data of pdl."""
 
     def __init__(
-        self,
-        token: str,
-        session: ClientSession = ClientSession(),
-        timeout: int = TIMEOUT,
+        self, token: str, session: ClientSession | None = None, timeout: int = TIMEOUT
     ) -> None:
         """Initialize."""
         self.auth = Auth(token, session, timeout)
