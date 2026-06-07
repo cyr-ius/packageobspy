@@ -31,6 +31,8 @@ class Auth:
 
     async def async_request(self, url: str, method: str = "get", **kwargs: Any) -> Any:
         """Request session."""
+        contents: Any = None
+        response: Any = None
         kwargs.setdefault("headers", {})
 
         if url != TOKEN_ENDPONT:
