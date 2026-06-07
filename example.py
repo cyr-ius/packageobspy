@@ -7,7 +7,7 @@ import logging
 from aiohttp import ClientSession
 import yaml
 
-from packageobspy import PackageObs
+from packageobspy import PackageObs, PackageObsException
 
 logger = logging.getLogger()
 logger.setLevel(logging.DEBUG)
@@ -27,11 +27,15 @@ async def async_main() -> None:
     """Main function."""
     async with ClientSession() as session:
         api = PackageObs(token=secrets["TOKEN"], session=session)
-        response = await api.async_get_stations()
-        response = await api.async_get_6m(id_station=98833002)
-        response = await api.async_get_horaire(id_departement=78)
-        logger.info(response)
-        await api.async_close()
+        try:
+            response = await api.async_get_stations()
+            response = await api.async_get_6m(id_station=98833002)
+            response = await api.async_get_horaire(id_departement=78)
+            logger.info(response)
+        except PackageObsException as err:
+            logger.error(err)
+        finally:
+            await api.async_close()
 
 
 if __name__ == "__main__":
