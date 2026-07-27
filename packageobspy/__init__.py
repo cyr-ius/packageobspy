@@ -5,8 +5,8 @@ from .exceptions import PackageObsException
 from .packageobs import PackageObs
 
 __all__ = [
+    "HttpRequestError",
     "PackageObs",
     "PackageObsException",
-    "HttpRequestError",
     "TimeoutExceededError",
 ]

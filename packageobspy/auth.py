@@ -40,7 +40,7 @@ class HTTPRequest:
                 response = await self.session.request(method, url, **kwargs)
                 contents = await response.read()
                 response.raise_for_status()
-        except (asyncio.CancelledError, asyncio.TimeoutError) as error:
+        except (TimeoutError, asyncio.CancelledError) as error:
             raise TimeoutExceededError(
                 "Timeout occurred while connecting to PackageObs API."
             ) from error
